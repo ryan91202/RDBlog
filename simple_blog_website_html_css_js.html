@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Ideas Blog</title>
+
+<style>
+/* ====== GLOBAL ====== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  background: #0f172a;
+  color: sky blue;
+  line-height: 1.6;
+}
+
+/* ====== HEADER ====== */
+.top-bar {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: linear-gradient(135deg, #95B88F, #7c3aed);
+  color:#8FB8AA;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.top-bar h1 {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* ====== LAYOUT ====== */
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem 3rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr);
+  gap: 2rem;
+}
+@media (max-width: 800px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+}
+
+section {
+  background: #020617;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid #1f2937;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #e5e7eb;
+}
+
+/* ====== FORM ====== */
+label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  color: #70AAB8;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #995395;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #f9fafb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.35);
+}
+
+button:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* ====== POSTS ====== */
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post {
+  padding: 1rem 1.1rem;
+  border-radius: 0.75rem;
+  background: radial-gradient(circle at top left, #111827, #020617);
+  border: 1px solid #995395;
+  position: relative;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+
+.post-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.post-date {
+  font-size: 0.75rem;
+  color: #8ca3af;
+}
+
+.post-content {
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+
+.post-actions {
+  margin-top: 0.7rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.post-actions button {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  box-shadow: none;
+}
+
+.delete-btn {
+  background: #ef4444;
+}
+
+.footer {
+  text-align: center;
+  padding: 1rem 0 1.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<header class="top-bar">
+  <h1>My Ideas & Notes</h1>
+  <p class="subtitle">A simple place for thoughts, experiments, and random brainwaves.</p>
+</header>
+
+<main class="container">
+  <section class="new-post">
+    <h2>New Post</h2>
+    <form id="postForm">
+      <label for="title">Title</label>
+      <input id="title" type="text" placeholder="Give your idea a name..." required />
+
+      <label for="content">Content</label>
+      <textarea id="content" rows="6" placeholder="Write your idea here..." required></textarea>
+
+      <button type="submit">Publish</button>
+    </form>
+  </section>
+
+  <section class="posts">
+    <h2>Posts</h2>
+    <div id="postsContainer" class="posts-list"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  Built by me, powered by static HTML/CSS/JS.
+</footer>
+
+<script>
+/* ====== BLOG LOGIC ====== */
+const STORAGE_KEY = "my_ideas_blog_posts";
+
+const postForm = document.getElementById("postForm");
+const titleInput = document.getElementById("title");
+const contentInput = document.getElementById("content");
+const postsContainer = document.getElementById("postsContainer");
+
+function loadPosts() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch { return []; }
+}
+
+function savePosts(posts) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+}
+
+function formatDate(dateString) {
+  return new Date(dateString).toLocaleString();
+}
+
+function renderPosts() {
+  const posts = loadPosts().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  postsContainer.innerHTML = "";
+
+  if (posts.length === 0) {
+    const empty = document.createElement("p");
+    empty.textContent = "No posts yet. Write something above and hit Publish.";
+    empty.style.color = "#9ca3af";
+    postsContainer.appendChild(empty);
+    return;
+  }
+
+  posts.forEach((post, index) => {
+    const postEl = document.createElement("article");
+    postEl.className = "post";
+
+    const header = document.createElement("div");
+    header.className = "post-header";
+
+    const title = document.createElement("h3");
+    title.className = "post-title";
+    title.textContent = post.title;
+
+    const date = document.createElement("span");
+    date.className = "post-date";
+    date.textContent = formatDate(post.createdAt);
+
+    header.appendChild(title);
+    header.appendChild(date);
+
+    const content = document.createElement("div");
+    content.className = "post-content";
+    content.textContent = post.content;
+
+    const actions = document.createElement("div");
+    actions.className = "post-actions";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.onclick = () => {
+      const current = loadPosts();
+      current.splice(index, 1);
+      savePosts(current);
+      renderPosts();
+    };
+
+    actions.appendChild(deleteBtn);
+
+    postEl.appendChild(header);
+    postEl.appendChild(content);
+    postEl.appendChild(actions);
+
+    postsContainer.appendChild(postEl);
+  });
+}
+
+postForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const title = titleInput.value.trim();
+  const content = contentInput.value.trim();
+  if (!title || !content) return;
+
+  const posts = loadPosts();
+  posts.push({
+    title,
+    content,
+    createdAt: new Date().toISOString(),
+  });
+
+  savePosts(posts);
+  titleInput.value = "";
+  contentInput.value = "";
+  renderPosts();
+});
+
+renderPosts();
+</script>
+
+</body>
+</html>
