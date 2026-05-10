@@ -239,14 +239,11 @@ button:active {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-
-  // ====== DOM ELEMENTS ======
   const postForm = document.getElementById("postForm");
   const titleInput = document.getElementById("title");
   const contentInput = document.getElementById("content");
   const postsContainer = document.getElementById("postsContainer");
 
-  // ====== LOAD POSTS FROM FIRESTORE ======
   async function loadPosts() {
     postsContainer.innerHTML = "<p style='color:#9ca3af;'>Loading...</p>";
 
@@ -256,10 +253,8 @@ button:active {
     postsContainer.innerHTML = "";
 
     if (snapshot.empty) {
-      const empty = document.createElement("p");
-      empty.textContent = "No posts yet. Write something above and hit Publish.";
-      empty.style.color = "#9ca3af";
-      postsContainer.appendChild(empty);
+      postsContainer.innerHTML =
+        "<p style='color:#9ca3af;'>No posts yet. Write something above and hit Publish.</p>";
       return;
     }
 
@@ -284,7 +279,6 @@ button:active {
       postsContainer.appendChild(postEl);
     });
 
-    // Hook up delete buttons
     document.querySelectorAll(".delete-btn").forEach(btn => {
       btn.onclick = async () => {
         await deleteDoc(doc(db, "posts", btn.dataset.id));
@@ -293,7 +287,6 @@ button:active {
     });
   }
 
-  // ====== HANDLE NEW POST SUBMIT ======
   postForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -312,7 +305,6 @@ button:active {
     loadPosts();
   });
 
-  // Initial load
   loadPosts();
 </script>
 
